@@ -105,3 +105,57 @@ def Ohlc(df):
     ))
     fig.show()
 
+def logisticReg(df):
+    X = df["Open", "High", "Low", "Close", "Volume"]
+    y = (df["close"].shift(-1) > df["close"]).astype(int)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=0.80, test_size=0.2, shuffle=False  
+    )
+    model = lm.LogisticRegression()
+    model = model.fit(X_train, y_train)
+    pred = model.predict(X_test)
+    return pred, y_test
+
+
+def decisionTreeClass(df):
+    X = df["Open", "High", "Low", "Close", "Volume"]
+    y = (df["close"].shift(-1) > df["close"]).astype(int)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=0.80, test_size=0.2, shuffle=False  
+    )
+    X = df["Open", "High", "Low", "Close", "Volume"]
+    y = df["close"].shift(-1)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=0.80, test_size=0.2, shuffle=False  
+    )
+    model = DecisionTreeClassifier()
+    model = model.fit(X_train,y_train)
+    pred = model.predict(X_test)
+    return pred, y_test
+
+def decisionTreeClass(df):
+    X = df["Open", "High", "Low", "Close", "Volume"]
+    y = df["close"].shift(-1)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=0.80, test_size=0.2, shuffle=False  
+    )
+    X = df["Open", "High", "Low", "Close", "Volume"]
+    y = df["close"].shift(-1)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=0.80, test_size=0.2, shuffle=False  
+    )
+    model = DecisionTreeRegressor()
+    model = model.fit(X_train,y_train)
+    pred = model.predict(X_test)
+    return pred, y_test
+
+def linearReg(df):
+    X = df["Open", "High", "Low", "Close", "Volume"]
+    y = df["close"].shift(-1)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=0.80, test_size=0.2, shuffle=False  
+    )
+    model = lm.LinearRegression()
+    model.fit(X_train, y_train)
+    pred = model.predict(X_test)
+    return pred, y_test
