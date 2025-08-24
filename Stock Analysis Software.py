@@ -20,7 +20,7 @@ def getWeeklyData ():
     r = requests.get(url)
     data = r.json()
     data = data["Weekly Adjusted Time Series"]
-    return data
+    return formatData(data)
 
 def getDailyData ():
     stockName = input("What is the name of the companies stock ")
@@ -29,7 +29,7 @@ def getDailyData ():
     r = requests.get(url)
     data = r.json()
     data = data["Daily Adjusted Time Series"]
-    return data
+    return formatData(data)
 
 def getMonthlyData ():
     stockName = input("What is the name of the companies stock ")
@@ -38,7 +38,7 @@ def getMonthlyData ():
     r = requests.get(url)
     data = r.json()
     data = data["Monthly Adjusted Time Series"]
-    return data
+    return formatData(data)
 
 def formatData(data):
     df = pd.DataFrame.from_dict(data, orient='index')
@@ -115,7 +115,7 @@ def logisticReg(df):
     model = lm.LogisticRegression()
     model = model.fit(X_train, y_train)
     pred = model.predict(X_test)
-    return pred, y_test
+    eval_for_class_models(pred, y_test)
 
 
 def decisionTreeClass(df):
@@ -127,7 +127,7 @@ def decisionTreeClass(df):
     model = DecisionTreeClassifier()
     model = model.fit(X_train,y_train)
     pred = model.predict(X_test)
-    return pred, y_test
+    eval_for_class_models(pred, y_test)
 
 def decisionTreeClass(df):
     X = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
@@ -138,7 +138,7 @@ def decisionTreeClass(df):
     model = DecisionTreeRegressor()
     model = model.fit(X_train,y_train)
     pred = model.predict(X_test)
-    return pred, y_test
+    eval_for_reg_models(pred, y_test)
 
 def linearReg(df):
     X = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
@@ -149,7 +149,7 @@ def linearReg(df):
     model = lm.LinearRegression()
     model.fit(X_train, y_train)
     pred = model.predict(X_test)
-    return pred, y_test
+    eval_for_reg_models(pred, y_test)
 
 def eval_for_reg_models(pred, test):
     print("MSE:", mean_squared_error(test, pred))
@@ -160,4 +160,103 @@ def eval_for_class_models(pred, test):
     print("Accuracy:", accuracy_score(test, pred))
     print(classification_report(test, pred))
     print("Confusion Matrix:\n", confusion_matrix(test, pred))
-    
+
+class StockGUI(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Stock Analysis App")
+        self.geometry("600x400")
+
+        # Container that holds all pages stacked
+        container = tk.Frame(self)
+        container.pack(fill="both", expand=True)
+
+        # Make the container stretch with the window
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        # Create pages and keep references in a dict
+        self.pages = {}
+        for Page in (FirstPage, SecondPage, ThirdPage, ModelPage, VisPage, SelectionPage):
+            page = Page(parent=container, controller=self)
+            self.pages[Page.__name__] = page
+            page.grid(row=0, column=0, sticky="nsew")  # stacked
+
+        self.show_page("FirstPage")
+
+    def show_page(self, name: str):
+        """Raise the requested page to the top."""
+        self.pages[name].tkraise()
+
+
+class FirstPage(tk.Frame):
+    def __init__(self, parent, controller: StockGUI):
+        super().__init__(parent)
+        tk.Label(self, text="Welcome", font=("Arial", 18)).pack(pady=20)
+        tk.Button(self, text="Next",
+                  command=lambda: controller.show_page("SecondPage")
+                  ).pack(pady=10)
+
+
+class SecondPage(tk.Frame):
+    def __init__(self, parent, controller: StockGUI):
+        super().__init__(parent)
+        tk.Label(self, text="Second Screen", font=("Arial", 18)).pack(pady=20)
+        tk.Button(self, text="Next",
+                  command=lambda: controller.show_page("ThirdPage")
+                  ).pack(pady=10)
+        tk.Button(self, text="Back",
+                  command=lambda: controller.show_page("FirstPage")
+                  ).pack(pady=10)
+
+class ThirdPage(tk.Frame):
+    def __init__(self, parent, controller: StockGUI):
+        super().__init__(parent)
+        tk.Label(self, text="Third Screen", font=("Arial", 18)).pack(pady=20)
+        tk.Button(self, text="Model",
+                  command=lambda: controller.show_page("ModelPage")
+                  ).pack(pady=10)
+        tk.Button(self, text="Visualistaion",
+                  command=lambda: controller.show_page("VisPage")
+                  ).pack(pady=10)
+        tk.Button(self, text="Back",
+                  command=lambda: controller.show_page("SecondPage")
+                  ).pack(pady=10)
+
+class ModelPage(tk.Frame):
+    def __init__(self, parent, controller: StockGUI):
+        super().__init__(parent)
+        tk.Label(self, text="Model Screen", font=("Arial", 18)).pack(pady=20)
+        tk.Button(self, text="Next",
+                  command=lambda: controller.show_page("FirstPage")
+                  ).pack(pady=10)
+        tk.Button(self, text="Back",
+                  command=lambda: controller.show_page("ThirdPage")
+                  ).pack(pady=10)
+
+class VisPage(tk.Frame):
+    def __init__(self, parent, controller: StockGUI):
+        super().__init__(parent)
+        tk.Label(self, text="Vis Screen", font=("Arial", 18)).pack(pady=20)
+        tk.Button(self, text="Next",
+                  command=lambda: controller.show_page("SelectionPage")
+                  ).pack(pady=10)
+        tk.Button(self, text="Back",
+                  command=lambda: controller.show_page("ThirdPage")
+                  ).pack(pady=10)
+
+class SelectionPage(tk.Frame):
+    def __init__(self, parent, controller: StockGUI):
+        super().__init__(parent)
+        tk.Label(self, text="Selection Screen", font=("Arial", 18)).pack(pady=20)
+        tk.Button(self, text="Next",
+                  command=lambda: controller.show_page("FirstPage")
+                  ).pack(pady=10)
+        tk.Button(self, text="Back",
+                  command=lambda: controller.show_page("VisPage")
+                  ).pack(pady=10)
+
+
+if __name__ == "__main__":
+    app = StockGUI()
+    app.mainloop()
