@@ -1,20 +1,21 @@
 #Stock Analysis Software
+import tkinter as tk
+from tkinter import ttk
 import requests
-import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from IPython.display import display
 import sklearn.linear_model as lm
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, f1_score, precision_score, recall_score, classification_report
+from sklearn.metrics import confusion_matrix, accuracy_score, f1_score, precision_score, recall_score, classification_report, mean_squared_error, mean_absolute_error, r2_score 
 import plotly.graph_objects as go
 import plotly.io as pio
 pio.renderers.default = "browser"  
 
 def getWeeklyData ():
     stockName = input("What is the name of the companies stock ")
-    key = input("What is your api key for alphavantage")
+    key = input("What is your api key for alphavantage ")
     url = 'https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY_ADJUSTED&symbol='  + stockName + '&apikey=' + key
     r = requests.get(url)
     data = r.json()
@@ -23,7 +24,7 @@ def getWeeklyData ():
 
 def getDailyData ():
     stockName = input("What is the name of the companies stock ")
-    key = input("What is your api key for alphavantage")
+    key = input("What is your api key for alphavantage ")
     url = url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol='  + stockName + '&apikey=' + key
     r = requests.get(url)
     data = r.json()
@@ -32,7 +33,7 @@ def getDailyData ():
 
 def getMonthlyData ():
     stockName = input("What is the name of the companies stock ")
-    key = input("What is your api key for alphavantage")
+    key = input("What is your api key for alphavantage ")
     url = 'https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol=' + stockName + '&apikey=' + key
     r = requests.get(url)
     data = r.json()
@@ -106,8 +107,8 @@ def Ohlc(df):
     fig.show()
 
 def logisticReg(df):
-    X = df["Open", "High", "Low", "Close", "Volume"]
-    y = (df["close"].shift(-1) > df["close"]).astype(int)
+    X = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
+    y = (df["Close"].shift(-1) > df["Close"]).astype(int)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, train_size=0.80, test_size=0.2, shuffle=False  
     )
@@ -118,13 +119,8 @@ def logisticReg(df):
 
 
 def decisionTreeClass(df):
-    X = df["Open", "High", "Low", "Close", "Volume"]
-    y = (df["close"].shift(-1) > df["close"]).astype(int)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, train_size=0.80, test_size=0.2, shuffle=False  
-    )
-    X = df["Open", "High", "Low", "Close", "Volume"]
-    y = df["close"].shift(-1)
+    X = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
+    y = (df["Close"].shift(-1) > df["Close"]).astype(int)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, train_size=0.80, test_size=0.2, shuffle=False  
     )
@@ -134,13 +130,8 @@ def decisionTreeClass(df):
     return pred, y_test
 
 def decisionTreeClass(df):
-    X = df["Open", "High", "Low", "Close", "Volume"]
-    y = df["close"].shift(-1)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, train_size=0.80, test_size=0.2, shuffle=False  
-    )
-    X = df["Open", "High", "Low", "Close", "Volume"]
-    y = df["close"].shift(-1)
+    X = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
+    y = df["Close"].shift(-1)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, train_size=0.80, test_size=0.2, shuffle=False  
     )
@@ -150,8 +141,8 @@ def decisionTreeClass(df):
     return pred, y_test
 
 def linearReg(df):
-    X = df["Open", "High", "Low", "Close", "Volume"]
-    y = df["close"].shift(-1)
+    X = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
+    y = df["Close"].shift(-1)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, train_size=0.80, test_size=0.2, shuffle=False  
     )
@@ -159,3 +150,14 @@ def linearReg(df):
     model.fit(X_train, y_train)
     pred = model.predict(X_test)
     return pred, y_test
+
+def eval_for_reg_models(pred, test):
+    print("MSE:", mean_squared_error(test, pred))
+    print("MAE:", mean_absolute_error(test, pred))
+    print("R²:", r2_score(test, pred))
+
+def eval_for_class_models(pred, test):
+    print("Accuracy:", accuracy_score(test, pred))
+    print(classification_report(test, pred))
+    print("Confusion Matrix:\n", confusion_matrix(test, pred))
+    
