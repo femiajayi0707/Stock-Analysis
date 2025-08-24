@@ -129,7 +129,7 @@ def decisionTreeClass(df):
     pred = model.predict(X_test)
     eval_for_class_models(pred, y_test)
 
-def decisionTreeClass(df):
+def decisionTreeReg(df):
     X = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
     y = df["Close"].shift(-1)
     X_train, X_test, y_train, y_test = train_test_split(
@@ -167,25 +167,20 @@ class StockGUI(tk.Tk):
         self.title("Stock Analysis App")
         self.geometry("600x400")
 
-        # Container that holds all pages stacked
         container = tk.Frame(self)
         container.pack(fill="both", expand=True)
-
-        # Make the container stretch with the window
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        # Create pages and keep references in a dict
         self.pages = {}
         for Page in (FirstPage, SecondPage, ThirdPage, ModelPage, VisPage, SelectionPage):
             page = Page(parent=container, controller=self)
             self.pages[Page.__name__] = page
-            page.grid(row=0, column=0, sticky="nsew")  # stacked
+            page.grid(row=0, column=0, sticky="nsew")  
 
         self.show_page("FirstPage")
 
     def show_page(self, name: str):
-        """Raise the requested page to the top."""
         self.pages[name].tkraise()
 
 
@@ -260,3 +255,5 @@ class SelectionPage(tk.Frame):
 if __name__ == "__main__":
     app = StockGUI()
     app.mainloop()
+
+
